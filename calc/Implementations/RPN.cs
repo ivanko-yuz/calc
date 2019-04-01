@@ -7,50 +7,59 @@ namespace calc
 {
     public class RPN : CalcBase, IRPN
     {
-        public String LengyelFormaKonvertalas(String input)
+        public string LengyelFormaKonvertalas(String input)
         {
-            Stack<char> stack = new Stack<char>();
-            String str = input.Replace(" ", string.Empty);
+            var stack = new Stack<char>();
+            string str = input.Replace(" ", string.Empty);
             var formula = new List<char>();
 
-            for (int i = 0; i < str.Length; i++)
+            foreach (var x in str)
             {
-                char x = str[i];
-                if (x == BRACKETS.OPEN)
-                    stack.Push(x);
-                else if (x == BRACKETS.CLOSED)
+                switch (x)
                 {
-                    while (stack.Count > 0 && stack.Peek() != BRACKETS.OPEN)
-                        formula.Add(stack.Pop());
-                    stack.Pop();
-                }
-                else if (IsOperandus(x))
-                {
-                    formula.Add(x);
-                }
-                else if (IsOperator(x))
-                {
-                    while (stack.Count > 0 && stack.Peek() != BRACKETS.OPEN && Prior(x) <= Prior(stack.Peek()))
-                        formula.Add(stack.Pop());
-                    stack.Push(x);
-                }
-                else
-                {
-                    char y = stack.Pop();
-                    if (y != BRACKETS.OPEN)
-                        formula.Add(y);
+                    case BRACKETS.OPEN:
+                        stack.Push(x);
+                        break;
+                    case BRACKETS.CLOSED:
+                    {
+                        while (stack.Count > 0 && stack.Peek() != BRACKETS.OPEN)
+                            formula.Add(stack.Pop());
+                        stack.Pop();
+                        break;
+                    }
+                    default:
+                    {
+                        if (IsOperandus(x))
+                        {
+                            formula.Add(x);
+                        }
+                        else if (IsOperator(x))
+                        {
+                            while (stack.Count > 0 && stack.Peek() != BRACKETS.OPEN && Prior(x) <= Prior(stack.Peek()))
+                                formula.Add(stack.Pop());
+                            stack.Push(x);
+                        }
+                        else
+                        {
+                            var y = stack.Pop();
+                            if (y != BRACKETS.OPEN)
+                                formula.Add(y);
+                        }
+
+                        break;
+                    }
                 }
             }
             while (stack.Count > 0)
             {
                 formula.Add(stack.Pop());
             }
-            return String.Join(' ', formula);
+            return string.Join(' ', formula);
         }
 
         #region Helpers
-       
-        protected int Prior(char c)
+
+        private static int Prior(char c)
         {
             switch (c)
             {

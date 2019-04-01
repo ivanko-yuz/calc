@@ -6,24 +6,32 @@ namespace calc
 {
     public class Calculator : CalcBase, ICalculator
     {
-        public String Calculate(String input)
+        private readonly Func<string, IOperation> serviceAccessor;
+
+        public Calculator(
+            Func<string, IOperation> serviceAccessor)
+        {
+            this.serviceAccessor = serviceAccessor;
+        }
+
+        public string Calculate(string input)
         {
             var stack = new Stack<double>();
             var array = input.Replace(" ", string.Empty).ToCharArray();
 
-            for (int i = 0; i < array.Length; i++)
+            foreach (var x in array)
             {
-                char x = array[i];
                 if (IsOperandus(x))
                 {
                     stack.Push(int.Parse(x.ToString()));
                 }
+
                 if (IsOperator(x))
                 {
                     var second = stack.Pop();
                     var first = stack.Pop();
-                    var operationresult = DoOperations(x, first, second);
-                    stack.Push(operationresult);
+                    var operationResult = DoOperations(x, first, second);
+                    stack.Push(operationResult);
                 }
             }
 
@@ -35,15 +43,15 @@ namespace calc
             switch (c)
             {
                 case OPERATION.PLUS:
-                    return new Addition().Operate(a, b);
+                    return serviceAccessor("Addition").Operate(a, b);
                 case OPERATION.MINUS:
-                    return new Subtraction().Operate(a, b);
+                    return serviceAccessor("Subtraction").Operate(a, b);
                 case OPERATION.MULTIPLY:
-                    return new Multiplication().Operate(a, b);
+                    return serviceAccessor("Multiplication").Operate(a, b);
                 case OPERATION.DIVITE:
-                    return new Division().Operate(a, b);
+                    return serviceAccessor("Division").Operate(a, b);
                 case OPERATION.POWER:
-                    return new Power().Operate(a, b);
+                    return serviceAccessor("Power").Operate(a, b);
                 default:
                     throw new ArgumentException("Rossz parameter");
             }
